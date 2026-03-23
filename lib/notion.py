@@ -253,6 +253,73 @@ def get_latest_research_row() -> Optional[dict]:
 # Convenience: get approved ideas not yet in Script Library
 # ---------------------------------------------------------------------------
 
+def _parse_inline(text: str) -> list:
+    """Convert inline markdown (bold, italic, code) to Notion rich_text annotation format."""
+    import re
+    rich_text = []
+    pattern = r'(\*\*\*(.+?)\*\*\*|\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`|([^*`\n]+))'
+    for match in re.finditer(pattern, text):
+        bold_italic = match.group(2)
+        bold = match.group(3)
+        italic = match.group(4)
+        code = match.group(5)
+        plain = match.group(6)
+        if bold_italic:
+            rich_text.append({"type": "text", "text": {"content": bold_italic},
+                               "annotations": {"bold": True, "italic": True}})
+        elif bold:
+            rich_text.append({"type": "text", "text": {"content": bold},
+                               "annotations": {"bold": True}})
+        elif italic:
+            rich_text.append({"type": "text", "text": {"content": italic},
+                               "annotations": {"italic": True}})
+        elif code:
+            rich_text.append({"type": "text", "text": {"content": code},
+                               "annotations": {"code": True}})
+        elif plain:
+            rich_text.append({"type": "text", "text": {"content": plain}})
+    return rich_text if rich_text else [{"type": "text", "text": {"content": text}}]
+
+
+def markdown_to_blocks(text: str) -> list:
+    """
+    Convert a markdown string to a list of Notion API block objects.
+    Supports: ## headings, ### headings, bullet lists, numbered lists,
+    blockquotes, dividers, bold/italic inline, and plain paragraphs.
+    """
+    import re
+    blocks = []
+    for line in text.split('\n'):
+        s = line.strip()
+        if not s:
+            continue
+        if s.startswith('### '):
+            blocks.append({"object": "block", "type": "heading_3",
+                            "heading_3": {"rich_text": _parse_inline(s[4:])}})
+        elif s.startswith('## '):
+            blocks.append({"object": "block", "type": "heading_2",
+                            "heading_2": {"rich_text": _parse_inline(s[3:])}})
+        elif s.startswith('# '):
+            blocks.append({"object": "block", "type": "heading_1",
+                            "heading_1": {"rich_text": _parse_inline(s[2:])}})
+        elif s in ('---', '***', '___'):
+            blocks.append({"object": "block", "type": "divider", "divider": {}})
+        elif s.startswith('- ') or s.startswith('* '):
+            blocks.append({"object": "block", "type": "bulleted_list_item",
+                            "bulleted_list_item": {"rich_text": _parse_inline(s[2:])}})
+        elif re.match(r'^\d+\.\s', s):
+            content = re.sub(r'^\d+\.\s', '', s)
+            blocks.append({"object": "block", "type": "numbered_list_item",
+                            "numbered_list_item": {"rich_text": _parse_inline(content)}})
+        elif s.startswith('> '):
+            blocks.append({"object": "block", "type": "quote",
+                            "quote": {"rich_text": _parse_inline(s[2:])}})
+        else:
+            blocks.append({"object": "block", "type": "paragraph",
+                            "paragraph": {"rich_text": _parse_inline(s)}})
+    return blocks
+
+
 def get_approved_ideas() -> list:
     return query_database(
         DB_IDEAS,

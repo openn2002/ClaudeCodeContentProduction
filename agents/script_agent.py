@@ -23,6 +23,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from lib.notion import (
     DB_SCRIPT_LIBRARY,
     create_page,
+    append_blocks,
+    markdown_to_blocks,
     get_approved_ideas,
     get_page,
     get_latest_research_row,
@@ -71,20 +73,26 @@ You will be given:
 
 Use inputs 2 and 3 to shape the hook style, script format, and caption — not just the idea itself.
 
-For each idea, produce a script with these exact sections:
+For each idea, produce a script with these exact six sections in order:
+
+## Creative Direction
+2–4 sentences covering: overall tone and energy, who the talent is (member-led, presenter-to-camera, voiceover, etc.), setting and aesthetic (home kitchen, natural light, unpolished vs. styled), and any important filming notes. This is the brief for the person filming — not a shot list, just enough direction to set the right vibe.
 
 ## Hook
-The opening 3–5 seconds. Must stop the scroll. Include the on-screen text and spoken line.
-Provide 2 alternative hooks to test.
+Three complete hook options to choose from or A/B test. For each, write:
+- **Option [A/B/C]:** One sentence description of the hook style
+- **Spoken line:** The exact words said in the opening 3–5 seconds
+
+Keep hooks punchy. No visual directions here — that's covered by Creative Direction and the On-Screen Text section.
 
 ## Script Outline
-Scene-by-scene breakdown with timing. Include what is said, what appears on screen, and any key visual direction.
+Scene-by-scene breakdown with rough timing (e.g. 0:00–0:10). For each scene, write the spoken content only — what the talent actually says. Do not include visual directions or on-screen text notes inside this section; those belong in Creative Direction and Key On-Screen Text respectively.
 
-## Key On-Screen Text Callouts
-Bullet list of the most important text overlays to display throughout the video.
+## Key On-Screen Text
+Bullet list of every text overlay that appears throughout the video, in order. Keep each one short — these are the words that flash on screen to reinforce or punctuate what's being said.
 
 ## CTA
-The closing moment. Match the energy of the content — most videos should end with a soft, community-building action (save this, follow for more, comment below, share with someone who needs this). Reserve product CTAs (visit the site, start your free trial) for videos that are explicitly product-focused. When in doubt, go soft.
+One to three sentences for the closing moment. Match the energy of the content — most videos should end with a soft, community-building action (save this, follow for more, comment below, share with someone who needs this). Reserve product CTAs (visit the site, start your free trial) for videos that are explicitly product-focused. When in doubt, go soft.
 
 ## Caption
 The social media caption for this post. Include relevant Australian hashtags. Keep it punchy and platform-appropriate. The caption should feel native — not like a press release.
@@ -177,7 +185,7 @@ def generate_script(
 
 
 def parse_script_sections(script: str) -> dict:
-    """Extract the five script sections from the generated text."""
+    """Extract the six script sections from the generated text."""
     import re
 
     def extract(text: str, heading: str, next_headings: list) -> str:
@@ -185,20 +193,32 @@ def parse_script_sections(script: str) -> dict:
         match = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
         return match.group(0).strip() if match else ""
 
+    all_headings = ["Creative Direction", "Hook", "Script Outline", "Key On-Screen", "CTA", "Caption"]
+
     return {
-        "Hook": extract(script, "Hook", ["Script Outline", "Key On-Screen", "CTA", "Caption"]),
-        "Script Outline": extract(script, "Script Outline", ["Key On-Screen", "CTA", "Caption", "Hook"]),
-        "Key on-screen text callouts": extract(script, "Key On-Screen", ["CTA", "Caption", "Hook", "Script"]),
-        "CTA": extract(script, "CTA", ["Caption", "Hook", "Script", "Key"]),
-        "Caption": extract(script, "Caption", ["Hook", "Script", "Key", "CTA"]),
+        "Creative Direction": extract(script, "Creative Direction", ["Hook", "Script Outline", "Key On-Screen", "CTA", "Caption"]),
+        "Hook": extract(script, "Hook", ["Script Outline", "Key On-Screen", "CTA", "Caption", "Creative"]),
+        "Script Outline": extract(script, "Script Outline", ["Key On-Screen", "CTA", "Caption", "Hook", "Creative"]),
+        "Key On-Screen Text": extract(script, "Key On-Screen", ["CTA", "Caption", "Hook", "Script", "Creative"]),
+        "CTA": extract(script, "CTA", ["Caption", "Hook", "Script", "Key", "Creative"]),
+        "Caption": extract(script, "Caption", ["Hook", "Script", "Key", "CTA", "Creative"]),
     }
 
 
 def write_to_notion(idea_page: dict, sections: dict) -> dict:
+    """
+    Create the Script Library page with metadata in properties and
+    the full script written as formatted page body blocks.
+
+    Properties hold only short, scannable fields (Caption, CTA) plus checkboxes.
+    The script body (Creative Direction → Caption) is written as Notion blocks
+    so bold/italic/headings render correctly when the page is opened.
+    """
     props = idea_page.get("properties", {})
     title_blocks = props.get("Name", {}).get("title", [])
     title = "".join(b.get("text", {}).get("content", "") for b in title_blocks)
 
+    # Create the page — keep Caption and CTA as properties for quick DB-view scanning
     page = create_page(
         DB_SCRIPT_LIBRARY,
         {
@@ -206,13 +226,28 @@ def write_to_notion(idea_page: dict, sections: dict) -> dict:
             "Agent Generated": prop_checkbox(True),
             "Science Approved": prop_checkbox(False),
             "Approved for filming": prop_checkbox(False),
-            "Hook": prop_rich_text(sections.get("Hook", "")),
-            "Script Outline": prop_rich_text(sections.get("Script Outline", "")),
-            "Key on-screen text callouts": prop_rich_text(sections.get("Key on-screen text callouts", "")),
-            "CTA": prop_rich_text(sections.get("CTA", "")),
-            "Caption": prop_rich_text(sections.get("Caption", "")),
+            "Caption": prop_rich_text(sections.get("Caption", "")[:2000]),
+            "CTA": prop_rich_text(sections.get("CTA", "")[:500]),
         },
     )
+
+    # Build the full script as page body blocks for proper formatting
+    section_order = [
+        "Creative Direction",
+        "Hook",
+        "Script Outline",
+        "Key On-Screen Text",
+        "CTA",
+        "Caption",
+    ]
+    body_md = "\n\n".join(
+        sections[s] for s in section_order if sections.get(s)
+    )
+    if body_md:
+        blocks = markdown_to_blocks(body_md)
+        if blocks:
+            append_blocks(page["id"], blocks)
+
     return page
 
 

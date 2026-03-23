@@ -24,9 +24,10 @@ INSTAGRAM_HASHTAGS = [
 ]
 
 YOUTUBE_KEYWORDS = [
-    "GLP-1 weight loss 2025", "ozempic diet plan", "CSIRO diet results",
-    "high protein weight loss", "gut health for weight loss",
-    "weight loss over 50", "Mayo Clinic diet", "sustainable weight loss"
+    "GLP-1 weight loss Australia 2025", "ozempic diet plan Australia",
+    "CSIRO diet results", "high protein weight loss",
+    "gut health for weight loss", "weight loss over 50 Australia",
+    "sustainable weight loss Australia",
 ]
 
 GOOGLE_KEYWORDS = [
@@ -34,10 +35,10 @@ GOOGLE_KEYWORDS = [
     "ozempic side effects diet",
     "best diet for weight loss Australia",
     "CSIRO total wellbeing diet review",
-    "Mayo Clinic diet review",
-    "high protein diet weight loss",
+    "high protein diet weight loss Australia",
     "weight loss program Australia",
     "gut health weight loss",
+    "dietitian Australia weight loss",
 ]
 
 # Competitor accounts to monitor across platforms
@@ -164,8 +165,6 @@ def scrape_youtube_trending(max_results: int = 20) -> list:
             run_input = {
                 "searchKeywords": keyword,
                 "maxResults": max_results // 4,
-                "startUrls": [],
-                "type": "video",
             }
             run = client.actor("apify/youtube-scraper").call(run_input=run_input)
             for item in client.dataset(run["defaultDatasetId"]).iterate_items():
@@ -359,11 +358,11 @@ def format_for_prompt(data: dict) -> str:
         )
 
     if instagram_competitors:
-        lines.append("\n## COMPETITOR INSTAGRAM — Recent Posts")
-        lines.append(f"Accounts: {', '.join(COMPETITOR_ACCOUNTS_INSTAGRAM)}\n")
+        lines.append("\n## COMPETITOR INSTAGRAM — Recent Posts by Brand Keyword")
+        lines.append(f"Keywords: {', '.join(COMPETITOR_KEYWORDS)}\n")
         for i, p in enumerate(instagram_competitors[:15], 1):
             lines.append(
-                f"{i}. @{p['account']} [{p['likes']:,} likes] {p['type']}\n"
+                f"{i}. #{p['hashtag']} [{p['likes']:,} likes] {p['type']}\n"
                 f"   Caption: {p['caption'][:200]}"
             )
 

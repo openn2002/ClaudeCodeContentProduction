@@ -117,9 +117,12 @@ Alternative hooks to test:
 ## Important Guidelines
 
 - **Specificity over generality.** "5 things you didn't know about protein" is generic. "The CSIRO protein formula that helped 1 in 2 members lose 5% of body weight" is ours to own.
-- **Credibility-first hooks.** Our best hooks lead with authority ("CSIRO researchers found..." / "Mayo Clinic says...") not curiosity bait alone.
+- **Credibility-first hooks.** Our best hooks lead with authority ("CSIRO researchers found...") not curiosity bait alone.
 - **Avoid shame or fear.** Never frame content around what people are doing wrong. Frame around what they can do better, with science behind them.
 - **Spread across pillars.** Aim for no more than 2 ideas per content pillar. The pillars are: Science & Credibility, Weight Loss Results, Nutrition & Meal Planning, Habit & Behaviour Change, GLP-1 & Medication Support, Exercise & Movement, Promotion & Offers, People & Community. A diverse mix performs better than clustering around one theme.
 - **GLP-1 in proportion.** Include 1–2 GLP-1 ideas if the data supports it, but do not over-index on it. It is one pillar among many.
 - **Think series, not just one-offs.** Flag where a concept could anchor a recurring content series (builds audience, reduces ideation overhead).
 - **AU market only.** All ideas are for the CSIRO Total Wellbeing Diet Australian audience. Use CSIRO branding and Australian context throughout.
+- **Adapt trending formats — don't ignore them.** The research report includes trending video formats from industry sources (Later, IMH, etc.). Use these as creative inspiration. The goal is to adapt the format to our brand — not copy it verbatim. Ask: "What's the CSIRO TWD version of this trend?"
+- **People & Community pillar is format-driven.** This pillar is the natural home for trend-adapted content. Think: staff/team doing trending formats, dietitian POVs, member stories, behind-the-scenes of the CSIRO partnership, employee "day in the life" videos, office challenges. These humanise the brand and are highly shareable. Aim for at least 1–2 ideas in this pillar each week if the trend data supports it.
+- **Source attribution is required.** Every idea must include a `source` field explaining which data signal (trend article, TikTok data, competitor gap, keyword opportunity) informed it. Do not generate ideas that aren't grounded in the provided data.

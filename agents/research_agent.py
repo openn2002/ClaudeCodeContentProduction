@@ -2,14 +2,15 @@
 Research Agent — runs weekly (Friday night cron).
 
 Workflow:
-1. Runs Apify scrapers to gather live data:
+1. Fetches curated trend-reporting websites (Later, IMH, Buffer, etc.) via lib/web.py
+2. Runs Apify scrapers to gather live social data:
    - TikTok trending videos (health/wellness keywords)
    - Instagram top posts (health/wellness hashtags)
    - YouTube trending videos (health/wellness search)
    - Google Search results (health/wellness keywords)
-2. Passes all real scraped data + system prompt to Claude for analysis
-3. Creates a new row in the 🔍 Research Notion DB with the full report as page content
-4. Fires Slack notification to #content-pipeline
+3. Passes all data + system prompt to Claude for analysis
+4. Creates a new row in the 🔍 Research Notion DB with the full report as page content
+5. Fires Slack notification to #content-pipeline
 """
 
 import os
@@ -37,6 +38,7 @@ from lib.notion import (
 )
 from lib.slack import notify_content_pipeline, section_block, divider_block, button_block
 from lib.apify import gather_all
+from lib.web import fetch_all_trend_articles
 
 PROMPTS_DIR = Path(__file__).parent.parent / "prompts"
 MODEL = "claude-sonnet-4-6"
@@ -55,22 +57,28 @@ def week_range() -> tuple:
     return str(next_monday), str(next_sunday)
 
 
-def run_research(scraped_data: str) -> str:
-    """Pass scraped live data to Claude for analysis. Returns full markdown report."""
+def run_research(scraped_data: str, trend_articles: str) -> str:
+    """Pass scraped live data + trend articles to Claude for analysis. Returns full markdown report."""
     client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
     system_prompt = load_system_prompt()
 
     week_start, week_end = week_range()
     user_message = (
         f"Today is {date.today().isoformat()}. "
-        f"Current week: {week_start} to {week_end}.\n\n"
-        "Below is LIVE, scraped data from TikTok, Instagram, YouTube, and Google Search "
-        "pulled this week. Use this real data as your primary source — analyse what's "
-        "actually performing, what hooks are working, what topics are trending, and what "
-        "the GLP-1 conversation looks like right now.\n\n"
-        "Supplement with your own knowledge where needed, but ground your analysis in "
-        "the real data provided.\n\n"
-        "Produce the complete structured research report for both AU and US markets.\n\n"
+        f"Content week: {week_start} to {week_end}.\n\n"
+        "You have two data sources below:\n\n"
+        "**Source 1 — Industry Trend Articles:** Scraped from leading social media "
+        "trend-reporting websites (Later, Influencer Marketing Hub, Buffer, etc.). "
+        "Use this to surface trending video formats, viral hooks, and content styles "
+        "working right now — and how they could be adapted for the CSIRO TWD audience.\n\n"
+        "**Source 2 — Live Social Data:** Real scraped data from TikTok, Instagram, "
+        "YouTube, and Google Search. Use this to identify what's actually performing, "
+        "what hooks are working, and what topics are trending in health/wellness.\n\n"
+        "Ground your analysis in both sources. Supplement with your own knowledge where "
+        "needed, but do not invent trends not evidenced by the data.\n\n"
+        "Produce the complete structured research report for the AU market.\n\n"
+        "---\n\n"
+        f"{trend_articles}\n\n"
         "---\n\n"
         f"{scraped_data}"
     )
@@ -239,11 +247,15 @@ def main():
         print("Research report already exists for this content week. Skipping.")
         return
 
+    print("Fetching trend articles from industry websites...")
+    trend_articles = fetch_all_trend_articles(verbose=True)
+    print(f"Trend articles ready ({len(trend_articles)} chars).")
+
     print("Gathering live data via Apify...")
     scraped_data = gather_all(verbose=True)
     print(f"Scraped data ready ({len(scraped_data)} chars).")
 
-    report = run_research(scraped_data)
+    report = run_research(scraped_data, trend_articles)
     print(f"Research report generated ({len(report)} chars).")
 
     page = write_to_notion(report)

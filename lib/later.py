@@ -63,15 +63,14 @@ def get_post_analytics(post_id: str) -> dict:
     return resp.json().get("data", {})
 
 
-def get_last_7_days_performance() -> list:
+def _fetch_posts_for_range(since: str, until: str) -> list:
     """
-    Convenience: pull all posts + analytics across all profiles for last 7 days.
+    Internal: fetch posts + analytics across all profiles for a given date range.
     Returns list of dicts with keys: platform, published_at, caption, views,
     link_clicks, post_id.
+    Later analytics returns CUMULATIVE totals per post (not deltas) — callers
+    should overwrite existing values rather than adding to them.
     """
-    until = datetime.utcnow().date()
-    since = until - timedelta(days=7)
-
     profiles = get_profiles()
     results = []
 
@@ -80,7 +79,7 @@ def get_last_7_days_performance() -> list:
         platform_raw = profile.get("platform_type", "").lower()
         platform = PLATFORM_MAP.get(platform_raw, platform_raw.title())
 
-        posts = get_posts(profile_id, str(since), str(until))
+        posts = get_posts(profile_id, since, until)
         for post in posts:
             post_id = post.get("id")
             analytics = {}
@@ -101,3 +100,27 @@ def get_last_7_days_performance() -> list:
             )
 
     return results
+
+
+def get_last_7_days_performance() -> list:
+    """
+    Pull posts + analytics across all profiles for the last 7 days.
+    Used for the weekly Scorecard delta (new views in the past week).
+    """
+    until = datetime.utcnow().date()
+    since = until - timedelta(days=7)
+    return _fetch_posts_for_range(str(since), str(until))
+
+
+def get_all_posts_performance() -> list:
+    """
+    Pull ALL historical posts + their current cumulative analytics across all profiles.
+    Used to refresh the full Content Calendar on each Monday run — ensures videos
+    that spike or slow-burn weeks after publishing are always captured.
+
+    Later returns cumulative totals per post, so callers should OVERWRITE existing
+    Notion values (not add to them) to avoid double-counting.
+    """
+    until = datetime.utcnow().date()
+    since = until - timedelta(days=730)  # 2 years of history
+    return _fetch_posts_for_range(str(since), str(until))

@@ -2,19 +2,18 @@
 Performance Agent — runs Monday 8am AEST cron.
 
 Workflow:
-1. Later API — pulls last 7 days of post performance (TikTok, Instagram, YouTube)
-2. Meta API — pulls Facebook page reach for the same period
-3. Matches posts to Content Calendar rows by Publish Date + Platform
-4. Updates each matched Content Calendar row: Views, Link Clicks
-5. Rolls up to the current week's Weekly Scorecard row:
-   - TikTok Views, Instagram Reach, YouTube Views, Facebook Reach, Link Clicks
-   - Running: Views and Running: Link Clicks (cumulative)
-6. Analyses ALL historical live posts with Claude to surface patterns:
-   - What topics/pillars are driving above-average views
-   - Which hooks/titles are resonating
-   - What to do more of, what to avoid
-7. Saves performance insights to Research DB (Type = "Performance Analysis")
-8. Fires Slack summary to #organic-growth (includes top insight)
+1a. Later API (full history) — refreshes cumulative metrics for EVERY post ever published.
+    Overwrites Content Calendar Views/Link Clicks with current lifetime totals.
+    This catches videos that spike or slow-burn weeks after publishing.
+1b. Later API (last 7 days) — pulls the weekly delta for the Scorecard only.
+2.  Meta API — pulls Facebook page reach for the past 7 days.
+3.  Aggregates platform totals and updates the Weekly Scorecard row.
+4.  Analyses ALL historical live posts (with freshly updated metrics) using Claude:
+    - What topics/pillars are driving above-average views
+    - Which hooks/titles are resonating
+    - What to do more of, what to avoid
+5.  Saves performance insights to Research DB (Type = "Performance Analysis").
+6.  Fires Slack summary to #organic-growth (includes top insight).
 
 The performance insights feed into the Video Idea Agent and Script Agent,
 closing the flywheel: post → measure → learn → inform next ideas → repeat.
@@ -49,7 +48,7 @@ from lib.notion import (
     prop_date,
     prop_checkbox,
 )
-from lib.later import get_last_7_days_performance
+from lib.later import get_last_7_days_performance, get_all_posts_performance
 from lib.slack import (
     notify_organic_growth,
     section_block,
@@ -110,6 +109,14 @@ def get_calendar_rows_for_period(since: date, until: date) -> list:
                 },
             ]
         },
+    )
+
+
+def get_all_calendar_rows() -> list:
+    """Query ALL Content Calendar rows regardless of date, sorted by publish date."""
+    return query_database(
+        DB_CONTENT_CALENDAR,
+        sorts=[{"property": "Publish Date", "direction": "descending"}],
     )
 
 
@@ -340,10 +347,35 @@ def main():
     until = date.today() - timedelta(days=1)  # yesterday
     since = until - timedelta(days=6)          # 7 days back
 
-    # 1. Pull Later post performance
-    print(f"Fetching Later posts from {since} to {until}...")
+    # 1a. Refresh ALL historical posts in Content Calendar with current cumulative totals.
+    #     Later analytics returns lifetime totals per post, so we OVERWRITE — not add.
+    #     This ensures videos that spike weeks after publishing are always captured.
+    print("Refreshing metrics for all historical posts...")
+    all_later_posts = get_all_posts_performance()
+    all_calendar_rows = get_all_calendar_rows()
+    print(f"  {len(all_later_posts)} posts retrieved from Later (full history).")
+    print(f"  {len(all_calendar_rows)} Content Calendar rows loaded.")
+
+    refreshed_count = 0
+    for post in all_later_posts:
+        row = match_post_to_calendar(post, all_calendar_rows)
+        if row:
+            update_page(
+                row["id"],
+                {
+                    # Overwrite with current cumulative total — Later already gives us lifetime views
+                    "Views": prop_number(post.get("views", 0)),
+                    "Link Clicks": prop_number(post.get("link_clicks", 0)),
+                },
+            )
+            refreshed_count += 1
+
+    print(f"  Refreshed {refreshed_count} Content Calendar rows with current totals.")
+
+    # 1b. Pull the last 7 days specifically for this week's Scorecard delta.
+    print(f"Fetching this week's Later posts ({since} to {until}) for Scorecard...")
     later_posts = get_last_7_days_performance()
-    print(f"  {len(later_posts)} posts retrieved from Later.")
+    print(f"  {len(later_posts)} posts retrieved for weekly delta.")
 
     # 2. Pull Facebook reach from Meta API
     print("Fetching Facebook reach from Meta API...")
@@ -354,29 +386,7 @@ def main():
     except Exception as e:
         print(f"  WARNING: Meta API error — {e}. Facebook reach set to 0.")
 
-    # 3. Match posts to Content Calendar and update rows
-    print("Matching posts to Content Calendar...")
-    calendar_rows = get_calendar_rows_for_period(since, until)
-    print(f"  {len(calendar_rows)} calendar rows found for period.")
-
-    matched_count = 0
-    for post in later_posts:
-        row = match_post_to_calendar(post, calendar_rows)
-        if row:
-            existing_views = row["properties"].get("Views", {}).get("number") or 0
-            existing_clicks = row["properties"].get("Link Clicks", {}).get("number") or 0
-            update_page(
-                row["id"],
-                {
-                    "Views": prop_number(existing_views + post.get("views", 0)),
-                    "Link Clicks": prop_number(existing_clicks + post.get("link_clicks", 0)),
-                },
-            )
-            matched_count += 1
-
-    print(f"  Updated {matched_count} Content Calendar rows.")
-
-    # 4. Aggregate by platform for Scorecard
+    # 3. Aggregate by platform for Scorecard (weekly delta only)
     platform_totals = aggregate_by_platform(later_posts)
 
     tiktok_views = platform_totals["TikTok"]["views"]
@@ -387,7 +397,7 @@ def main():
     total_link_clicks = sum(v["link_clicks"] for v in platform_totals.values())
     total_views = tiktok_views + instagram_reach + youtube_views + facebook_reach
 
-    # 5. Update Weekly Scorecard
+    # 4. Update Weekly Scorecard
     week_label, week_start, week_end = week_label_and_range()
     scorecard_row = get_or_create_scorecard_row(week_start, week_end, week_label)
     scorecard_props = scorecard_row.get("properties", {})
@@ -409,7 +419,7 @@ def main():
     )
     print(f"Weekly Scorecard updated: {week_label}")
 
-    # 6. Analyse all historical live posts with Claude
+    # 5. Analyse all historical live posts with Claude (now using refreshed metrics)
     print("Fetching all live posts from Content Calendar for analysis...")
     all_live_posts = get_all_live_posts()
     print(f"  {len(all_live_posts)} posts with metrics found.")

@@ -184,15 +184,28 @@ ANALYSIS_SYSTEM_PROMPT = """
 You are a content performance analyst for Digital Wellness — the company that partners with
 CSIRO (Australia's national science agency) to deliver the CSIRO Total Wellbeing Diet.
 
-You will receive a list of published social media posts with their performance metrics.
-Your job is to identify what is and isn't working, and give specific, actionable
-recommendations that will directly inform next week's content ideas and scripts.
+You will receive the COMPLETE published content history — every post that has ever had
+metrics collected, from the earliest to the most recent. Your job is to synthesise this
+into a single, definitive Performance Insights document that represents everything we
+know about what works, as of today.
 
-Be ruthlessly specific. "Budget/value content performs well" is useful.
-"Health content gets views" is not.
+This is NOT a weekly report. It is a living brief — a cumulative picture built from all
+available data. It will replace last week's version and be read by:
+  1. The content team (for strategic decisions)
+  2. The idea generation agent (to know what topics and angles to prioritise)
+  3. The script writing agent (to shape hooks and framing based on proven patterns)
 
-Focus on patterns that are REPLICABLE — topics, angles, hooks, and formats that the
-team can deliberately repeat or build on.
+Rules:
+- Be ruthlessly specific. "Budget/value content consistently outperforms by 2x" is useful.
+  "Health content gets views" is not.
+- Distinguish between STANDING PATTERNS (consistently true across multiple posts over time)
+  and EMERGING SIGNALS (appearing in recent posts only — worth watching but not yet proven).
+- Focus on patterns that are REPLICABLE — topics, angles, hooks, formats the team can
+  deliberately repeat or build on.
+- If a pattern that appeared in earlier data is no longer supported by recent posts,
+  note that it may be fading and flag it accordingly.
+- Always ground recommendations in the data. If budget content works, say how many posts
+  showed this and by what margin vs average.
 """.strip()
 
 
@@ -237,13 +250,25 @@ def run_performance_analysis(posts: list) -> str:
 
     user_message = (
         f"Today is {date.today().isoformat()}.\n\n"
-        "Below is the full performance history for the CSIRO Total Wellbeing Diet social "
-        "media accounts — every published post that has had metrics collected, sorted by views.\n\n"
-        "Analyse this data and produce the Performance Insights Report. "
-        "Your output will be read by the content team AND injected directly into the "
-        "AI agents that generate next week's video ideas and scripts — so be specific "
-        "and actionable. What should we do MORE of? What should we STOP doing? "
-        "What topics and angles are clearly resonating with our audience?\n\n"
+        "Below is the complete published content history for the CSIRO Total Wellbeing Diet "
+        "social media accounts — every post that has ever had metrics collected, sorted by views.\n\n"
+        "Produce the definitive Performance Insights document as of today. This replaces the "
+        "previous version entirely. Structure your output as follows:\n\n"
+        "## 1. Standing Patterns\n"
+        "Patterns consistently supported by multiple posts over time. For each: what the "
+        "pattern is, how many posts support it, average uplift vs baseline.\n\n"
+        "## 2. Emerging Signals\n"
+        "Patterns appearing in recent posts only — not yet proven but worth watching.\n\n"
+        "## 3. What's Fading\n"
+        "Topics or formats that showed early promise but are no longer performing. "
+        "Flag if the data is inconclusive.\n\n"
+        "## 4. Platform Notes\n"
+        "Any meaningful differences in what works across TikTok, Instagram, Facebook, YouTube.\n\n"
+        "## 5. Pillar Notes\n"
+        "Performance breakdown by content pillar (Science, People & Community, etc.).\n\n"
+        "## 6. Recommendations for Ideas & Scripts\n"
+        "Specific, actionable direction for the team. What to do more of, what to stop, "
+        "what angles to explore next. Ground every recommendation in the data above.\n\n"
         f"{formatted}"
     )
 

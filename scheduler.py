@@ -2,10 +2,11 @@
 Scheduler — runs the pipeline on the defined cron schedule.
 
 Schedule (all times AEST):
-  - Friday  22:00  → research_agent
-  - Saturday 08:00 → video_idea_agent
-  - Hourly         → script_agent (polls for newly approved ideas)
-  - Monday  08:00  → performance_agent
+  - Friday  22:00  → research_agent       (trends, industry news, GLP-1)
+  - Friday  22:30  → competitor_agent     (competitor content scan)
+  - Friday  23:00  → performance_agent    (refresh metrics + cumulative synthesis)
+  - Saturday 08:00 → video_idea_agent     (reads all 3 fresh reports)
+  - Hourly         → script_agent         (polls for newly approved ideas)
 
 Usage:
   python scheduler.py
@@ -59,20 +60,20 @@ def run_performance():
 # Schedule definitions
 # ---------------------------------------------------------------------------
 
-# Friday 22:00 AEST — research
+# Friday 22:00 AEST — research (trends, industry news, GLP-1)
 schedule.every().friday.at("22:00").do(run_research)
 
-# Friday 23:00 AEST — competitor analysis (1hr after research)
-schedule.every().friday.at("23:00").do(run_competitor_analysis)
+# Friday 22:30 AEST — competitor analysis (30 mins after research)
+schedule.every().friday.at("22:30").do(run_competitor_analysis)
 
-# Saturday 08:00 AEST — video ideas (uses both research + competitor analysis)
+# Friday 23:00 AEST — performance analysis (refreshes metrics + cumulative synthesis)
+schedule.every().friday.at("23:00").do(run_performance)
+
+# Saturday 08:00 AEST — video ideas (reads all 3 fresh reports from Friday night)
 schedule.every().saturday.at("08:00").do(run_video_ideas)
 
 # Every hour — script agent polls for newly approved ideas
 schedule.every().hour.do(run_scripts)
-
-# Monday 08:00 AEST — performance report
-schedule.every().monday.at("08:00").do(run_performance)
 
 
 if __name__ == "__main__":

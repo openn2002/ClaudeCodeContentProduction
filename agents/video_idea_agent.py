@@ -25,15 +25,19 @@ from lib.notion import (
     DB_IDEAS,
     create_page,
     get_latest_research_row,
+    get_page_text,
+    query_database,
     prop_title,
     prop_select,
     prop_multi_select,
+    prop_rich_text,
     prop_checkbox,
     prop_date,
 )
 from lib.slack import notify_content_pipeline, section_block, divider_block, button_block
+from agents.competitor_agent import get_latest_analysis
 
-load_dotenv()
+load_dotenv(override=True)
 
 PROMPTS_DIR = Path(__file__).parent.parent / "prompts"
 MODEL = "claude-sonnet-4-6"
@@ -60,38 +64,58 @@ def load_system_prompt() -> str:
 
 
 def extract_research_text(research_page: dict) -> str:
-    """Pull all text fields from a Research Notion page into one string."""
-    props = research_page.get("properties", {})
-    parts = []
-    for field in ["Trending Topics", "Keyword Opportunities", "Platform Signals", "GLP-1 Landscape", "Strategic Summary"]:
-        rt = props.get(field, {}).get("rich_text", [])
-        text = "".join(block.get("text", {}).get("content", "") for block in rt)
-        if text:
-            parts.append(f"## {field}\n{text}")
-    return "\n\n".join(parts)
+    """Fetch the full research report from the page body blocks."""
+    return get_page_text(research_page["id"])
 
 
-def run_idea_generation(research_text: str) -> str:
-    """Run video-idea-agent and return the full output."""
+def run_idea_generation(research_text: str, competitor_analysis: str, recent_titles: list = None) -> str:
+    """Run video-idea-agent with both research and competitor analysis."""
     client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
     system_prompt = load_system_prompt()
 
+    competitor_section = (
+        f"\n\n---\n\n## COMPETITOR INTELLIGENCE REPORT\n\n{competitor_analysis}"
+        if competitor_analysis
+        else "\n\n(No competitor analysis available for this run.)"
+    )
+
+    recent_section = ""
+    if recent_titles:
+        titles_list = "\n".join(f"- {t}" for t in recent_titles)
+        recent_section = (
+            f"\n\n---\n\n**PREVIOUSLY GENERATED IDEAS (do not repeat these or close variations):**\n\n"
+            f"{titles_list}"
+        )
+
     user_message = (
         f"Today is {date.today().isoformat()}.\n\n"
-        "Here is the latest research report:\n\n"
-        f"{research_text}\n\n"
-        "Please generate your full ranked video concept list (10–15 concepts) "
-        "and full production briefs for the top 3. "
-        "For each concept in the ranked list, include a JSON metadata block in this format:\n"
+        "You have two intelligence inputs this week:\n\n"
+        "**1. Industry Research Report** (trends, keywords, platform signals, GLP-1 landscape):\n\n"
+        f"{research_text}"
+        f"{competitor_section}"
+        f"{recent_section}\n\n"
+        "---\n\n"
+        "Using BOTH inputs, generate your full ranked video concept list (10–15 concepts) "
+        "and full production briefs for the top 3.\n\n"
+        "Prioritise ideas that:\n"
+        "- Exploit gaps competitors are NOT filling well (use competitor report)\n"
+        "- Address audience frustrations surfaced in data\n"
+        "- Ride trends where CSIRO credibility gives us an unfair advantage\n\n"
+        "IMPORTANT — only generate ideas that are directly grounded in the data provided above. "
+        "Do NOT invent facts, announcements, product updates, or claims that are not present in "
+        "the research or competitor inputs. If you cannot point to a specific signal in the data "
+        "that supports an idea, do not include it.\n\n"
+        "For each concept in the ranked list, include a JSON metadata block:\n"
         "```json\n"
         '{"title": "...", "platform": ["TikTok"], "pillar": "Science & Credibility", '
-        '"market": "Both", "priority": "High"}\n'
+        '"market": "Australia", "priority": "High", '
+        '"source": "1-sentence description of which specific data signal or competitor insight informed this idea"}\n'
         "```\n"
         "Valid platforms: Instagram, Facebook, Facebook Group, TikTok, YouTube Shorts, YouTube\n"
         "Valid pillars: Science & Credibility, Weight Loss Results, Nutrition & Meal Planning, "
         "Habit & Behaviour Change, GLP-1 & Medication Support, Exercise & Movement, "
         "Promotion & Offers, People & Community\n"
-        "Valid markets: Australia, US, Both\n"
+        "Valid markets: Australia\n"
         "Valid priorities: Highest, High, Medium, Low"
     )
 
@@ -135,13 +159,15 @@ def parse_ideas(output: str) -> list:
             if pillar not in VALID_PILLARS:
                 pillar = "Science & Credibility"
 
-            market = data.get("market", "Both")
+            market = data.get("market", "Australia")
             if market not in VALID_MARKETS:
-                market = "Both"
+                market = "Australia"
 
             priority = data.get("priority", "Medium")
             if priority not in VALID_PRIORITIES:
                 priority = "Medium"
+
+            source = data.get("source", "").strip()[:500]
 
             ideas.append(
                 {
@@ -150,6 +176,7 @@ def parse_ideas(output: str) -> list:
                     "pillar": pillar,
                     "market": market,
                     "priority": priority,
+                    "source": source,
                 }
             )
         except json.JSONDecodeError:
@@ -158,11 +185,24 @@ def parse_ideas(output: str) -> list:
     return ideas
 
 
+def get_recent_idea_titles() -> list:
+    """Return idea titles from the last 4 weeks to avoid repeating them."""
+    pages = query_database(DB_IDEAS)
+    titles = []
+    for page in pages:
+        title_blocks = page.get("properties", {}).get("Name", {}).get("title", [])
+        title = "".join(b.get("text", {}).get("content", "") for b in title_blocks)
+        if title:
+            titles.append(title)
+    return titles
+
+
 def week_range() -> tuple[str, str]:
+    """Returns next week's Monday–Sunday — the content week these ideas are planned for."""
     today = date.today()
-    monday = today - timedelta(days=today.weekday())
-    sunday = monday + timedelta(days=6)
-    return str(monday), str(sunday)
+    next_monday = today + timedelta(days=(7 - today.weekday()))
+    next_sunday = next_monday + timedelta(days=6)
+    return str(next_monday), str(next_sunday)
 
 
 def write_ideas_to_notion(ideas: list) -> list:
@@ -181,6 +221,8 @@ def write_ideas_to_notion(ideas: list) -> list:
         }
         if idea["platforms"]:
             props["Platform"] = prop_multi_select(idea["platforms"])
+        if idea.get("source"):
+            props["Source"] = prop_rich_text(idea["source"])
 
         page = create_page(DB_IDEAS, props)
         created_pages.append(page)
@@ -226,7 +268,17 @@ def main():
     research_text = extract_research_text(research_page)
     print(f"Research loaded ({len(research_text)} chars).")
 
-    output = run_idea_generation(research_text)
+    competitor_analysis = get_latest_analysis()
+    if competitor_analysis:
+        print(f"Competitor analysis loaded ({len(competitor_analysis)} chars).")
+    else:
+        print("No competitor analysis found — run competitor_agent.py first for best results.")
+
+    recent_titles = get_recent_idea_titles()
+    if recent_titles:
+        print(f"Loaded {len(recent_titles)} recent idea titles to avoid repeating.")
+
+    output = run_idea_generation(research_text, competitor_analysis, recent_titles)
     print(f"Output generated ({len(output)} chars).")
 
     ideas = parse_ideas(output)

@@ -18,6 +18,7 @@ from datetime import date, timedelta, datetime
 from pathlib import Path
 
 import requests
+from typing import Optional
 from dotenv import load_dotenv
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -38,7 +39,7 @@ from lib.slack import (
     button_block,
 )
 
-load_dotenv()
+load_dotenv(override=True)
 
 META_ACCESS_TOKEN = os.getenv("META_ACCESS_TOKEN")
 META_PAGE_ID = os.getenv("META_PAGE_ID")
@@ -94,7 +95,7 @@ def get_calendar_rows_for_period(since: date, until: date) -> list:
     )
 
 
-def match_post_to_calendar(post: dict, calendar_rows: list) -> dict | None:
+def match_post_to_calendar(post: dict, calendar_rows: list) -> Optional[dict]:
     """
     Match a Later post to a Content Calendar row.
     Match criteria: same Publish Date (date portion) + overlapping platform.

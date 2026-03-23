@@ -40,12 +40,13 @@ What content FORMATS and STYLES are performing right now on:
 - Identify trends Digital Wellness could adopt that align with our science-credibility positioning
 
 ### 4. GLP-1 Landscape
-This is a strategic priority. Research:
+GLP-1 medications are one relevant topic in our space — cover it proportionally to its actual signal in the data, not as a dominant theme. Research:
 - Current news and sentiment around GLP-1 weight loss medications (Ozempic, Wegovy, Mounjaro, Zepbound)
-- What content creators and health platforms are producing about GLP-1
-- What questions people are asking about GLP-1 (side effects, effectiveness, cost, alternatives, "what to eat on GLP-1")
-- The "GLP-1 companion" content opportunity — programs and diet plans designed to work alongside medication
+- What questions people are asking about GLP-1 (side effects, cost, alternatives, "what to eat on GLP-1")
+- The "GLP-1 companion" content opportunity — where science-backed diet programs complement medication
 - Any regulatory or news developments relevant to AU or US markets
+
+Keep this section concise. If the scraped data shows limited GLP-1 signal this week, reflect that honestly rather than expanding artificially.
 
 ## Output Format
 

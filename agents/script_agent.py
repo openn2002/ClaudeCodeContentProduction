@@ -25,13 +25,16 @@ from lib.notion import (
     create_page,
     get_approved_ideas,
     get_page,
+    get_latest_research_row,
+    get_page_text,
     prop_title,
     prop_rich_text,
     prop_checkbox,
 )
 from lib.slack import notify_content_pipeline, section_block, divider_block, button_block
+from agents.competitor_agent import get_latest_analysis
 
-load_dotenv()
+load_dotenv(override=True)
 
 MODEL = "claude-sonnet-4-6"
 MAX_TOKENS = 8096
@@ -43,15 +46,23 @@ SLACK_USER_ID_OLLIE = os.getenv("SLACK_USER_ID_OLLIE", "")
 SLACK_USER_ID_NICOLE = os.getenv("SLACK_USER_ID_NICOLE", "")
 
 SCRIPT_SYSTEM_PROMPT = """
-You are a video content scriptwriter for Digital Wellness — the company behind the CSIRO Total Wellbeing Diet (AU) and Mayo Clinic Diet (US).
+You are a video content scriptwriter for Digital Wellness — the company behind the CSIRO Total Wellbeing Diet (Australia).
 
-Your job is to write production-ready short-form video scripts. Every script must be:
-- Grounded in science credibility (CSIRO or Mayo Clinic authority)
+Your job is to write production-ready short-form video scripts for the Australian market. Every script must be:
+- Grounded in CSIRO science credibility — this is our unfair advantage, use it
 - Warm and approachable, not clinical or preachy
 - Structured for short-form video (TikTok, Reels, YouTube Shorts) unless otherwise specified
 - Free from shame, fear, or quick-fix promises
+- Informed by what hooks, formats, and caption styles are actually working right now (see context below)
 
-For each idea provided, produce a script with these exact sections:
+You will be given:
+1. The approved video idea (title, pillar, platform, source signal)
+2. This week's research report — what topics are trending, what keywords matter, what platform formats are performing
+3. Competitor analysis — what hooks competitors are using, what formats are winning, what gaps exist
+
+Use inputs 2 and 3 to shape the hook style, script format, and caption — not just the idea itself.
+
+For each idea, produce a script with these exact sections:
 
 ## Hook
 The opening 3–5 seconds. Must be attention-grabbing. Include the on-screen text and spoken line.
@@ -67,7 +78,7 @@ Bullet list of the most important text overlays to display throughout the video.
 The final call to action — what we want the viewer to do (visit site, start trial, comment, follow, share).
 
 ## Caption
-The social media caption for this post. Include relevant hashtags. Keep it punchy and platform-appropriate.
+The social media caption for this post. Include relevant Australian hashtags. Keep it punchy and platform-appropriate.
 """
 
 
@@ -110,15 +121,25 @@ def extract_idea_context(idea_page: dict) -> str:
     )
 
 
-def generate_script(idea_context: str) -> str:
+def generate_script(idea_context: str, research_text: str = "", competitor_analysis: str = "") -> str:
     """Run Claude to generate the full script."""
     client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+    context_section = ""
+    if research_text:
+        context_section += f"\n\n---\n\n**THIS WEEK'S RESEARCH REPORT** (use to inform hook style, format, and topics):\n\n{research_text[:4000]}"
+    if competitor_analysis:
+        context_section += f"\n\n---\n\n**COMPETITOR ANALYSIS** (use to inform hook style, caption approach, and format choices):\n\n{competitor_analysis[:3000]}"
 
     user_message = (
         f"Today is {date.today().isoformat()}.\n\n"
         "Please write a full production script for the following approved video idea:\n\n"
-        f"{idea_context}\n\n"
-        "Follow the exact output structure defined in your system instructions."
+        f"{idea_context}"
+        f"{context_section}\n\n"
+        "---\n\n"
+        "Follow the exact output structure defined in your system instructions. "
+        "Use the research and competitor context to shape the hook, format, and caption — "
+        "not just the idea title."
     )
 
     response = client.messages.create(
@@ -209,6 +230,17 @@ def main():
         print("No new approved ideas. Exiting.")
         return
 
+    # Load research and competitor context once for all scripts this run
+    research_text = ""
+    research_page = get_latest_research_row()
+    if research_page:
+        research_text = get_page_text(research_page["id"])
+        print(f"Research context loaded ({len(research_text)} chars).")
+
+    competitor_analysis = get_latest_analysis()
+    if competitor_analysis:
+        print(f"Competitor context loaded ({len(competitor_analysis)} chars).")
+
     for idea_page in new_ideas:
         idea_id = idea_page["id"]
         props = idea_page.get("properties", {})
@@ -217,7 +249,7 @@ def main():
 
         print(f"Processing: {title}")
         idea_context = extract_idea_context(idea_page)
-        script = generate_script(idea_context)
+        script = generate_script(idea_context, research_text, competitor_analysis)
         sections = parse_script_sections(script)
 
         script_page = write_to_notion(idea_page, sections)

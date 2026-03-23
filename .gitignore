@@ -10,3 +10,7 @@ dist/
 build/
 .pytest_cache/
 reports/
+.processed_ideas.json
+.claude/
+~$*
+*.pptx

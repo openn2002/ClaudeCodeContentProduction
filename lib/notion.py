@@ -6,17 +6,21 @@ All DB IDs and property names are exact-matched to the live schemas.
 import os
 import requests
 from datetime import datetime, date
+from typing import Optional
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
 
 NOTION_API_KEY = os.getenv("NOTION_API_KEY")
 NOTION_VERSION = "2022-06-28"
 BASE_URL = "https://api.notion.com/v1"
 
-# Database IDs
-DB_RESEARCH = "9abf1967-ffe8-4bc4-a2a4-b7bfe2a9f74f"
-DB_IDEAS = "4a07179d-be0f-48fc-959d-da70809a10d8"
-DB_SCRIPT_LIBRARY = "328e1b43-3099-80c0-8d2c-000bf61a8845"
-DB_CONTENT_CALENDAR = "328e1b43-3099-80c1-82ce-000bb19649d3"
-DB_WEEKLY_SCORECARD = "650e541d-a675-4348-8a8b-b024499471ac"
+# Database IDs — page IDs from Notion URLs (used by REST API)
+DB_RESEARCH = "e3acb755-1822-4972-bc6d-afd43bdeb0ac"
+DB_IDEAS = "f10f7723-3b07-40bb-b102-a0f61c0c7cc7"
+DB_SCRIPT_LIBRARY = "328e1b43-3099-80f7-8757-c81031ad79df"
+DB_CONTENT_CALENDAR = "328e1b43-3099-80b9-b663-ec69cbb84088"
+DB_WEEKLY_SCORECARD = "73cc6247-1de2-4c16-987b-661fb05e32e1"
 
 
 def _headers():
@@ -65,8 +69,46 @@ def create_page(db_id: str, properties: dict, children: list = None) -> dict:
     if children:
         payload["children"] = children
     resp = requests.post(f"{BASE_URL}/pages", headers=_headers(), json=payload)
+    if not resp.ok:
+        print(f"[notion] create_page error {resp.status_code}: {resp.text[:2000]}")
     resp.raise_for_status()
     return resp.json()
+
+
+def get_page_text(page_id: str) -> str:
+    """Fetch all block content from a page and return as plain text."""
+    url = f"{BASE_URL}/blocks/{page_id}/children"
+    lines = []
+    has_more = True
+    cursor = None
+    while has_more:
+        params = {"page_size": 100}
+        if cursor:
+            params["start_cursor"] = cursor
+        resp = requests.get(url, headers=_headers(), params=params)
+        resp.raise_for_status()
+        data = resp.json()
+        for block in data.get("results", []):
+            block_type = block.get("type", "")
+            content = block.get(block_type, {})
+            rich_text = content.get("rich_text", [])
+            text = "".join(rt.get("plain_text", "") for rt in rich_text)
+            if text:
+                lines.append(text)
+        has_more = data.get("has_more", False)
+        cursor = data.get("next_cursor")
+    return "\n".join(lines)
+
+
+def append_blocks(page_id: str, blocks: list) -> None:
+    """Append content blocks to a page in batches of 100 (Notion API limit)."""
+    url = f"{BASE_URL}/blocks/{page_id}/children"
+    for i in range(0, len(blocks), 100):
+        batch = blocks[i:i + 100]
+        resp = requests.patch(url, headers=_headers(), json={"children": batch})
+        if not resp.ok:
+            print(f"[notion] append_blocks error {resp.status_code}: {resp.text[:500]}")
+        resp.raise_for_status()
 
 
 def update_page(page_id: str, properties: dict) -> dict:
@@ -89,7 +131,7 @@ def prop_title(text: str) -> dict:
 
 def prop_rich_text(text: str) -> dict:
     # Notion rich_text blocks have a 2000 char limit per block; chunk if needed
-    chunks = [text[i:i+2000] for i in range(0, len(text), 2000)]
+    chunks = [text[i:i+1800] for i in range(0, len(text), 1800)]
     return {"rich_text": [{"text": {"content": chunk}} for chunk in chunks]}
 
 
@@ -132,10 +174,11 @@ def prop_relation(page_urls: list) -> dict:
 # Convenience: get latest Research row
 # ---------------------------------------------------------------------------
 
-def get_latest_research_row() -> dict | None:
+def get_latest_research_row() -> Optional[dict]:
     pages = query_database(
         DB_RESEARCH,
-        sorts=[{"property": "Week", "direction": "descending"}],
+        filter_obj={"property": "Type", "select": {"equals": "Research"}},
+        sorts=[{"property": "Content Week", "direction": "descending"}],
     )
     return pages[0] if pages else None
 

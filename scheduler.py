@@ -39,6 +39,10 @@ def run_research():
     run_agent("research_agent.py")
 
 
+def run_competitor_analysis():
+    run_agent("competitor_agent.py")
+
+
 def run_video_ideas():
     run_agent("video_idea_agent.py")
 
@@ -58,7 +62,10 @@ def run_performance():
 # Friday 22:00 AEST — research
 schedule.every().friday.at("22:00").do(run_research)
 
-# Saturday 08:00 AEST — video ideas (after research)
+# Friday 23:00 AEST — competitor analysis (1hr after research)
+schedule.every().friday.at("23:00").do(run_competitor_analysis)
+
+# Saturday 08:00 AEST — video ideas (uses both research + competitor analysis)
 schedule.every().saturday.at("08:00").do(run_video_ideas)
 
 # Every hour — script agent polls for newly approved ideas

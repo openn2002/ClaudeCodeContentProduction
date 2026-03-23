@@ -174,6 +174,72 @@ def prop_relation(page_urls: list) -> dict:
 # Convenience: get latest Research row
 # ---------------------------------------------------------------------------
 
+def get_latest_analysis() -> Optional[dict]:
+    """Get the most recent Competitor Analysis row from the Research DB."""
+    pages = query_database(
+        DB_RESEARCH,
+        filter_obj={"property": "Type", "select": {"equals": "Competitor Analysis"}},
+        sorts=[{"property": "Content Week", "direction": "descending"}],
+    )
+    return pages[0] if pages else None
+
+
+def get_latest_performance_insights() -> Optional[str]:
+    """Get the most recent Performance Analysis report text from the Research DB."""
+    pages = query_database(
+        DB_RESEARCH,
+        filter_obj={"property": "Type", "select": {"equals": "Performance Analysis"}},
+        sorts=[{"property": "Content Week", "direction": "descending"}],
+    )
+    if not pages:
+        return None
+    return get_page_text(pages[0]["id"])
+
+
+def get_all_live_posts() -> list:
+    """
+    Query Content Calendar for all posts with Status=Live.
+    Returns structured list for performance analysis — name, platform, pillar, views, clicks.
+    Only includes posts that have views recorded (i.e. metrics have been collected).
+    """
+    pages = query_database(
+        DB_CONTENT_CALENDAR,
+        filter_obj={"property": "Status", "status": {"equals": "Live"}},
+        sorts=[{"property": "Publish Date", "direction": "descending"}],
+    )
+    posts = []
+    for page in pages:
+        props = page.get("properties", {})
+
+        title_arr = props.get("Name", {}).get("title", [])
+        name = title_arr[0].get("plain_text", "") if title_arr else ""
+
+        views = props.get("Views", {}).get("number") or 0
+        link_clicks = props.get("Link Clicks", {}).get("number") or 0
+
+        platform_ms = props.get("Platform", {}).get("multi_select", [])
+        platforms = [p.get("name", "") for p in platform_ms]
+
+        pillar_sel = props.get("Pillar", {}).get("select") or {}
+        pillar = pillar_sel.get("name", "")
+
+        pub_date = props.get("Publish Date", {}).get("date") or {}
+        published_at = pub_date.get("start", "")
+
+        # Only include posts that have had metrics collected
+        if name and views > 0:
+            posts.append({
+                "name": name,
+                "platforms": platforms,
+                "pillar": pillar,
+                "views": views,
+                "link_clicks": link_clicks,
+                "published_at": published_at,
+            })
+
+    return posts
+
+
 def get_latest_research_row() -> Optional[dict]:
     pages = query_database(
         DB_RESEARCH,

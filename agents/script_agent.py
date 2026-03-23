@@ -26,6 +26,7 @@ from lib.notion import (
     get_approved_ideas,
     get_page,
     get_latest_research_row,
+    get_latest_performance_insights,
     get_page_text,
     prop_title,
     prop_rich_text,
@@ -121,7 +122,12 @@ def extract_idea_context(idea_page: dict) -> str:
     )
 
 
-def generate_script(idea_context: str, research_text: str = "", competitor_analysis: str = "") -> str:
+def generate_script(
+    idea_context: str,
+    research_text: str = "",
+    competitor_analysis: str = "",
+    performance_insights: str = "",
+) -> str:
     """Run Claude to generate the full script."""
     client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
@@ -130,6 +136,11 @@ def generate_script(idea_context: str, research_text: str = "", competitor_analy
         context_section += f"\n\n---\n\n**THIS WEEK'S RESEARCH REPORT** (use to inform hook style, format, and topics):\n\n{research_text[:4000]}"
     if competitor_analysis:
         context_section += f"\n\n---\n\n**COMPETITOR ANALYSIS** (use to inform hook style, caption approach, and format choices):\n\n{competitor_analysis[:3000]}"
+    if performance_insights:
+        context_section += (
+            f"\n\n---\n\n**OUR PERFORMANCE INSIGHTS** (use to shape the hook and angle — "
+            f"topics and formats that have already proven to work for this brand):\n\n{performance_insights[:2000]}"
+        )
 
     user_message = (
         f"Today is {date.today().isoformat()}.\n\n"
@@ -138,8 +149,9 @@ def generate_script(idea_context: str, research_text: str = "", competitor_analy
         f"{context_section}\n\n"
         "---\n\n"
         "Follow the exact output structure defined in your system instructions. "
-        "Use the research and competitor context to shape the hook, format, and caption — "
-        "not just the idea title."
+        "Use the research, competitor, and performance context to shape the hook, format, "
+        "and caption — not just the idea title. If performance insights show a certain "
+        "angle or hook style works particularly well for this audience, lean into it."
     )
 
     response = client.messages.create(
@@ -241,6 +253,12 @@ def main():
     if competitor_analysis:
         print(f"Competitor context loaded ({len(competitor_analysis)} chars).")
 
+    performance_insights = get_latest_performance_insights()
+    if performance_insights:
+        print(f"Performance insights loaded ({len(performance_insights)} chars).")
+    else:
+        print("No performance insights yet — scripts will generate without performance context.")
+
     for idea_page in new_ideas:
         idea_id = idea_page["id"]
         props = idea_page.get("properties", {})
@@ -249,7 +267,7 @@ def main():
 
         print(f"Processing: {title}")
         idea_context = extract_idea_context(idea_page)
-        script = generate_script(idea_context, research_text, competitor_analysis)
+        script = generate_script(idea_context, research_text, competitor_analysis, performance_insights)
         sections = parse_script_sections(script)
 
         script_page = write_to_notion(idea_page, sections)

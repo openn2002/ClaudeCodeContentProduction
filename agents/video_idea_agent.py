@@ -35,6 +35,7 @@ from lib.notion import (
     prop_date,
 )
 from lib.slack import notify_content_pipeline, section_block, divider_block, button_block
+from lib.notion import get_latest_performance_insights
 from agents.competitor_agent import get_latest_analysis
 
 load_dotenv(override=True)
@@ -68,8 +69,13 @@ def extract_research_text(research_page: dict) -> str:
     return get_page_text(research_page["id"])
 
 
-def run_idea_generation(research_text: str, competitor_analysis: str, recent_titles: list = None) -> str:
-    """Run video-idea-agent with both research and competitor analysis."""
+def run_idea_generation(
+    research_text: str,
+    competitor_analysis: str,
+    recent_titles: list = None,
+    performance_insights: str = None,
+) -> str:
+    """Run video-idea-agent with research, competitor analysis, and performance insights."""
     client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
     system_prompt = load_system_prompt()
 
@@ -77,6 +83,16 @@ def run_idea_generation(research_text: str, competitor_analysis: str, recent_tit
         f"\n\n---\n\n## COMPETITOR INTELLIGENCE REPORT\n\n{competitor_analysis}"
         if competitor_analysis
         else "\n\n(No competitor analysis available for this run.)"
+    )
+
+    performance_section = (
+        f"\n\n---\n\n## OUR PERFORMANCE INSIGHTS — What's Working For Us\n\n"
+        f"{performance_insights[:3000]}\n\n"
+        "_Use this to build on what's already resonating with our audience. "
+        "If a topic, format, or angle has proven to perform well, generate ideas "
+        "that deliberately expand on it._"
+        if performance_insights
+        else "\n\n(No performance insights yet — will populate once posts go live.)"
     )
 
     recent_section = ""
@@ -89,27 +105,29 @@ def run_idea_generation(research_text: str, competitor_analysis: str, recent_tit
 
     user_message = (
         f"Today is {date.today().isoformat()}.\n\n"
-        "You have two intelligence inputs this week:\n\n"
+        "You have THREE intelligence inputs this week:\n\n"
         "**1. Industry Research Report** (trends, keywords, platform signals, GLP-1 landscape):\n\n"
         f"{research_text}"
         f"{competitor_section}"
+        f"{performance_section}"
         f"{recent_section}\n\n"
         "---\n\n"
-        "Using BOTH inputs, generate your full ranked video concept list (10–15 concepts) "
+        "Using ALL THREE inputs, generate your full ranked video concept list (10–15 concepts) "
         "and full production briefs for the top 3.\n\n"
         "Prioritise ideas that:\n"
-        "- Exploit gaps competitors are NOT filling well (use competitor report)\n"
-        "- Address audience frustrations surfaced in data\n"
+        "- Build on topics/formats that have already proven to perform well FOR US (performance insights)\n"
+        "- Exploit gaps competitors are NOT filling well (competitor report)\n"
+        "- Address audience frustrations surfaced in the research data\n"
         "- Ride trends where CSIRO credibility gives us an unfair advantage\n\n"
         "IMPORTANT — only generate ideas that are directly grounded in the data provided above. "
         "Do NOT invent facts, announcements, product updates, or claims that are not present in "
-        "the research or competitor inputs. If you cannot point to a specific signal in the data "
-        "that supports an idea, do not include it.\n\n"
+        "the research, competitor, or performance inputs. If you cannot point to a specific signal "
+        "in the data that supports an idea, do not include it.\n\n"
         "For each concept in the ranked list, include a JSON metadata block:\n"
         "```json\n"
         '{"title": "...", "platform": ["TikTok"], "pillar": "Science & Credibility", '
         '"market": "Australia", "priority": "High", '
-        '"source": "1-sentence description of which specific data signal or competitor insight informed this idea"}\n'
+        '"source": "1-sentence description of which specific data signal, competitor insight, or performance pattern informed this idea"}\n'
         "```\n"
         "Valid platforms: Instagram, Facebook, Facebook Group, TikTok, YouTube Shorts, YouTube\n"
         "Valid pillars: Science & Credibility, Weight Loss Results, Nutrition & Meal Planning, "
@@ -274,11 +292,17 @@ def main():
     else:
         print("No competitor analysis found — run competitor_agent.py first for best results.")
 
+    performance_insights = get_latest_performance_insights()
+    if performance_insights:
+        print(f"Performance insights loaded ({len(performance_insights)} chars).")
+    else:
+        print("No performance insights yet — ideas will be generated without performance context.")
+
     recent_titles = get_recent_idea_titles()
     if recent_titles:
         print(f"Loaded {len(recent_titles)} recent idea titles to avoid repeating.")
 
-    output = run_idea_generation(research_text, competitor_analysis, recent_titles)
+    output = run_idea_generation(research_text, competitor_analysis, recent_titles, performance_insights)
     print(f"Output generated ({len(output)} chars).")
 
     ideas = parse_ideas(output)

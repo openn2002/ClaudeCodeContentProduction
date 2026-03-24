@@ -100,12 +100,25 @@ For each option write:
 - **Option [A/B/C]:** Hook style in a few words (e.g. "call-out", "myth-bust", "surprising stat")
 - **Spoken line:** The exact words — punchy, direct, under 10 seconds when read aloud
 
-The hook style should match the content pillar:
-- **Science / Nutrition / GLP-1** — lead with a surprising fact, a myth to bust, or a tension that science resolves: "Raiding the fridge every night? Science finally explains why your willpower disappears after 8pm." / "You're not lazy. You're just eating lunch at the wrong time."
-- **Budget / Practical** — lead with the relatable frustration or the counterintuitive claim: "Eating healthy doesn't have to cost more. Here's proof." / "Most people overspend on groceries because of this one habit."
-- **People & Community** — lead with a moment, a feeling, or a call-out that makes people stop and think "that's literally me": "POV: it's 6pm and you have no idea what's for dinner again." / "When you meal prep on Sunday and eat it all by Tuesday 😅" / "If you've ever said 'I'll start Monday'... this one's for you."
+The hook style should match the content pillar — use these as a guide:
 
-For People & Community content especially, humour, self-awareness, and cultural relatability are the hook — not science. Don't force a credibility angle where a human moment works better.
+- **Science & Credibility** — lead with a surprising fact, a counterintuitive claim, or a myth to bust. The science is the payoff, not the setup: "You're not lazy. You're just eating lunch at the wrong time." / "This one habit has more impact on weight loss than the food you eat."
+
+- **Weight Loss Results** — lead with the relatable struggle or the "before" moment people recognise in themselves. Social proof and transformation hooks work here: "Most people quit their diet by week 3. Here's the one thing that changes that." / "She lost 12kg without ever feeling hungry. Here's what she did differently."
+
+- **Nutrition & Meal Planning** — lead with a practical problem, a budget tension, or a counterintuitive tip: "Eating healthy doesn't have to cost more — here's proof." / "The cheapest protein sources nutritionists actually recommend."
+
+- **Habit & Behaviour Change** — lead with the relatable failure moment or the psychology behind why people struggle. "It's not willpower" hooks perform well here: "Raiding the fridge every night? Science finally explains why your healthy habits fall apart after 8pm." / "The reason you keep falling off your diet has nothing to do with motivation."
+
+- **GLP-1 & Medication Support** — lead with a question people are scared to ask, a myth about medication, or something "no one tells you": "Going on GLP-1 medication? Here's what most people aren't told about nutrition." / "The one thing that makes GLP-1 medication actually work long-term."
+
+- **Exercise & Movement** — lead with a low-barrier entry point or a challenge to the assumption that exercise has to be hard: "You don't need the gym. You need 10 minutes and this." / "The most underrated form of exercise for weight loss — and you're probably already doing it."
+
+- **Promotion & Offers** — lead with urgency, value, or social proof. This is one of the few pillars where a direct product reference in the hook is appropriate: "Our biggest offer of the year is live — and it closes Sunday." / "Thousands of Australians started their health journey this month. Here's why."
+
+- **People & Community** — lead with a human moment, a relatable POV, or something that makes people stop and think "that's literally me". Humour and self-awareness work better here than science: "POV: it's 6pm and you have no idea what's for dinner again." / "When you meal prep on Sunday and eat it all by Tuesday 😅" / "If you've ever said 'I'll start Monday'... this one's for you."
+
+For People & Community content especially, don't force a credibility angle where a human moment works better.
 
 No visual directions in this section — that's covered by Creative Direction.
 

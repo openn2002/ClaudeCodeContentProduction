@@ -32,6 +32,7 @@ from lib.notion import (
     get_page_text,
     prop_title,
     prop_rich_text,
+    prop_select,
     prop_checkbox,
 )
 from lib.slack import notify_content_pipeline, section_block, divider_block, button_block
@@ -262,17 +263,22 @@ def write_to_notion(idea_page: dict, sections: dict) -> dict:
     title_blocks = props.get("Name", {}).get("title", [])
     title = "".join(b.get("text", {}).get("content", "") for b in title_blocks)
 
-    # Create the page — keep Caption as a property for quick DB-view copying
-    page = create_page(
-        DB_SCRIPT_LIBRARY,
-        {
-            "Name": prop_title(title),
-            "Agent Generated": prop_checkbox(True),
-            "Science Approved": prop_checkbox(False),
-            "Approved for filming": prop_checkbox(False),
-            "Caption": prop_rich_text(sections.get("Caption", "")[:2000]),
-        },
-    )
+    # Extract pillar from the source idea page
+    pillar_sel = props.get("Pillar", {}).get("select") or {}
+    pillar = pillar_sel.get("name", "")
+
+    # Create the page — Caption as property for quick copying, Pillar for filtering
+    page_props = {
+        "Name": prop_title(title),
+        "Agent Generated": prop_checkbox(True),
+        "Science Approved": prop_checkbox(False),
+        "Approved for filming": prop_checkbox(False),
+        "Caption": prop_rich_text(sections.get("Caption", "")[:2000]),
+    }
+    if pillar:
+        page_props["Pillar"] = prop_select(pillar)
+
+    page = create_page(DB_SCRIPT_LIBRARY, page_props)
 
     # Build the full script as page body blocks for proper formatting
     section_order = [

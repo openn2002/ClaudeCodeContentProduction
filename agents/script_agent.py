@@ -266,11 +266,13 @@ def write_to_notion(idea_page: dict, sections: dict) -> dict:
     title_blocks = props.get("Name", {}).get("title", [])
     title = "".join(b.get("text", {}).get("content", "") for b in title_blocks)
 
-    # Extract pillar from the source idea page
+    # Extract pillar and priority from the source idea page
     pillar_sel = props.get("Pillar", {}).get("select") or {}
     pillar = pillar_sel.get("name", "")
+    priority_sel = props.get("Priority", {}).get("select") or {}
+    priority = priority_sel.get("name", "")
 
-    # Create the page — Caption as property for quick copying, Pillar for filtering
+    # Create the page — Caption as property for quick copying, Pillar + Priority for filtering
     page_props = {
         "Name": prop_title(title),
         "Agent Generated": prop_checkbox(True),
@@ -280,6 +282,8 @@ def write_to_notion(idea_page: dict, sections: dict) -> dict:
     }
     if pillar:
         page_props["Pillar"] = prop_select(pillar)
+    if priority:
+        page_props["Priority"] = prop_select(priority)
 
     page = create_page(DB_SCRIPT_LIBRARY, page_props)
 

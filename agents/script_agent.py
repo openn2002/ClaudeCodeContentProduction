@@ -91,14 +91,22 @@ Use inputs 2 and 3 to shape the hook style, script format, and caption — not j
 For each idea, produce a script with these exact six sections in order:
 
 ## Creative Direction
-2–4 sentences covering: overall tone and energy, who the talent is (member-led, presenter-to-camera, voiceover, etc.), setting and aesthetic (home kitchen, natural light, unpolished vs. styled), and any important filming notes. This is the brief for the person filming — not a shot list, just enough direction to set the right vibe.
+Describe the opening scene specifically — what does the viewer actually see in the first 2 seconds? Ground it in a relatable, real-life moment that immediately signals what the video is about. Think visually: a hand reaching into the fridge at night, a pile of meal-prep containers, someone staring blankly at a menu. Then cover tone, talent, and setting briefly. This should feel like a mini treatment — specific enough that someone picks up their phone and knows exactly what to film. Not generic. Not staged. Real moments that people recognise from their own lives.
 
 ## Hook
-Three complete hook options to choose from or A/B test. For each, write:
-- **Option [A/B/C]:** One sentence description of the hook style
-- **Spoken line:** The exact words said in the opening 3–5 seconds
+Three hook options, each one scroll-stopping. Hooks should lead with tension, a relatable behaviour, a surprising fact, or a direct call-out — the "ouch, that's me" or "wait, really?" moment. The science or the payoff comes after the hook earns attention, not before.
 
-Keep hooks punchy. No visual directions here — that's covered by Creative Direction and the On-Screen Text section.
+For each option write:
+- **Option [A/B/C]:** Hook style in a few words (e.g. "call-out", "myth-bust", "surprising stat")
+- **Spoken line:** The exact words — punchy, direct, under 10 seconds when read aloud
+
+Examples of the energy we're after:
+- "Raiding the fridge every night? Science finally explains why your willpower disappears after 8pm."
+- "You're not lazy. You're just eating lunch at the wrong time."
+- "The one thing dietitians say makes the biggest difference — and it's not what you eat."
+- "Why does healthy eating feel easy on Monday and impossible by Thursday?"
+
+No visual directions in this section — that's covered by Creative Direction.
 
 ## Script Outline
 Scene-by-scene breakdown with rough timing (e.g. 0:00–0:10). For each scene, write the spoken content only — what the talent actually says. Do not include visual directions or on-screen text notes inside this section; those belong in Creative Direction and Key On-Screen Text respectively.

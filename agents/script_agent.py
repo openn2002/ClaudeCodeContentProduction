@@ -103,15 +103,16 @@ Keep hooks punchy. No visual directions here — that's covered by Creative Dire
 ## Script Outline
 Scene-by-scene breakdown with rough timing (e.g. 0:00–0:10). For each scene, write the spoken content only — what the talent actually says. Do not include visual directions or on-screen text notes inside this section; those belong in Creative Direction and Key On-Screen Text respectively.
 
-The final scene is the closing moment. It should feel natural — not bolted on. The best closings either echo back to the hook (completing the loop), invite the audience into a conversation, or give them something to do with what they just learned. Only include a product reference in the closing if the entire video has been about the program. Do not manufacture a reason to mention it.
+The final scene is the closing moment. It should feel like a natural end to this specific video — not a generic sign-off. Choose whichever of the following fits the content, pillar, and tone:
 
-Good closing options to draw from:
-- Loop back to the hook: if the hook was a question or a claim, resolve or reframe it at the end
-- Invite participation: "Drop your go-to budget meal in the comments", "What's one swap you're making this week?"
-- Prompt saving/sharing: "Save this for your next grocery shop", "Share this with someone who needs to hear it"
-- Build habit/follow: "Follow for more evidence-based tips like this"
-- Soft curiosity: "We break this down even further — link in bio"
-- Community signal: "Our members do this every week — it makes a real difference" (only when it fits naturally)
+- **Loop back to the hook** — if the hook posed a question or tension, resolve it and close the loop
+- **Participation prompt** — invite the audience into a conversation ("Drop your go-to budget meal below", "What's one swap you're making this week?")
+- **Save or share** — when the content is reference-worthy ("Save this for your next grocery shop", "Share this with someone who needs it")
+- **Follow for more** — when the video naturally leads somewhere ("Follow for more evidence-based tips like this")
+- **Soft curiosity** — when there's a natural next step ("We go deeper on this — link in bio")
+- **Community signal** — when it fits organically ("Our members do this every week")
+
+Only include a product reference in the closing if the entire video has been about the program. Do not manufacture a reason to mention it.
 
 ## Key On-Screen Text
 Bullet list of every text overlay that appears throughout the video, in order. Keep each one short — these are the words that flash on screen to reinforce or punctuate what's being said.

@@ -92,36 +92,39 @@ Use inputs 2 and 3 to shape the hook style, script format, and caption — not j
 For each idea, produce a script with these exact six sections in order:
 
 ## Creative Direction
-Describe the opening scene specifically — what does the viewer actually see in the first 2 seconds? Ground it in a relatable, real-life moment that immediately signals what the video is about. Think visually: a hand reaching into the fridge at night, a pile of meal-prep containers, someone staring blankly at a menu. Then cover tone, talent, and setting briefly. This should feel like a mini treatment — specific enough that someone picks up their phone and knows exactly what to film. Not generic. Not staged. Real moments that people recognise from their own lives.
+Start with the specific opening action — what is the talent physically doing in the first 2 seconds that the viewer sees before a single word is spoken? This is the visual hook: it should immediately signal what the video is about and make someone stop scrolling. Be concrete and specific. "Someone closes the fridge" is not enough — "hand reaches into an open fridge, pulls out leftover pasta, eats it standing up in the dark kitchen at 10pm" is. Think: caught in the act, relatable moment, something people recognise from their own lives.
+
+Then briefly cover: who the talent is, tone and energy, setting, and whether it's raw/handheld or slightly more composed. Keep it to 3–4 sentences total. This is a filming brief, not a shot list.
 
 ## Hook
-Three hook options, each one scroll-stopping. Hooks should lead with tension, a relatable behaviour, a surprising fact, or a direct call-out — the "ouch, that's me" or "wait, really?" moment. The science or the payoff comes after the hook earns attention, not before.
+Three hook options, each one designed to stop the scroll. A great hook has two components that work together: a **visual hook** (what the viewer sees) and a **spoken hook** (what they hear). On TikTok and Reels, many viewers watch on mute or decide to keep watching before they've heard a word — the visual must earn attention on its own, and the spoken line must reward it.
 
 For each option write:
-- **Option [A/B/C]:** Hook style in a few words (e.g. "call-out", "myth-bust", "surprising stat")
-- **Spoken line:** The exact words — punchy, direct, under 10 seconds when read aloud
+- **Option [A/B/C]:** Hook style in a few words (e.g. "caught in the act", "myth-bust", "surprising stat", "relatable POV")
+- **Visual hook:** What is happening on screen in the first 2 seconds — the specific action or image that stops the scroll
+- **Spoken line:** The exact words — punchy, direct, under 10 seconds when read aloud. Lead with tension, a relatable behaviour, a surprising fact, or a direct call-out. The science or payoff comes after the hook earns attention, not before.
+
+The visual and spoken hooks should complement each other — the visual sets up the tension, the spoken line names it or twists it.
 
 The hook style should match the content pillar — use these as a guide:
 
-- **Science & Credibility** — lead with a surprising fact, a counterintuitive claim, or a myth to bust. The science is the payoff, not the setup: "You're not lazy. You're just eating lunch at the wrong time." / "This one habit has more impact on weight loss than the food you eat."
+- **Science & Credibility** — visual: something unexpected or counterintuitive on screen (a food label, a surprising comparison). Spoken: lead with the surprising fact or myth-bust. "You're not lazy. You're just eating lunch at the wrong time." / "This one habit has more impact on weight loss than the food you eat."
 
-- **Weight Loss Results** — lead with the relatable struggle or the "before" moment people recognise in themselves. Social proof and transformation hooks work here: "Most people quit their diet by week 3. Here's the one thing that changes that." / "She lost 12kg without ever feeling hungry. Here's what she did differently."
+- **Weight Loss Results** — visual: a relatable "before" moment — someone looking frustrated at the scale, staring at the wardrobe. Spoken: the struggle or the social proof. "Most people quit their diet by week 3. Here's the one thing that changes that." / "She lost 12kg without ever feeling hungry. Here's what she did differently."
 
-- **Nutrition & Meal Planning** — lead with a practical problem, a budget tension, or a counterintuitive tip: "Eating healthy doesn't have to cost more — here's proof." / "The cheapest protein sources nutritionists actually recommend."
+- **Nutrition & Meal Planning** — visual: a grocery receipt, a fridge full of cheap ingredients, a budget meal being prepped. Spoken: the practical problem or counterintuitive tip. "Eating healthy doesn't have to cost more — here's proof." / "The cheapest protein sources nutritionists actually recommend."
 
-- **Habit & Behaviour Change** — lead with the relatable failure moment or the psychology behind why people struggle. "It's not willpower" hooks perform well here: "Raiding the fridge every night? Science finally explains why your healthy habits fall apart after 8pm." / "The reason you keep falling off your diet has nothing to do with motivation."
+- **Habit & Behaviour Change** — visual: caught in the act — hand in the chip bag, closing the fridge at night, phone in hand at 11pm instead of sleeping. Spoken: the relatable failure or the "it's not your fault" reframe. "Raiding the fridge every night? Science finally explains why your healthy habits fall apart after 8pm." / "The reason you keep falling off your diet has nothing to do with motivation."
 
-- **GLP-1 & Medication Support** — lead with a question people are scared to ask, a myth about medication, or something "no one tells you": "Going on GLP-1 medication? Here's what most people aren't told about nutrition." / "The one thing that makes GLP-1 medication actually work long-term."
+- **GLP-1 & Medication Support** — visual: someone reading a prescription, or a question appearing on screen. Spoken: the question people are scared to ask, the myth, or "what no one tells you". "Going on GLP-1 medication? Here's what most people aren't told about nutrition." / "The one thing that makes GLP-1 medication actually work long-term."
 
-- **Exercise & Movement** — lead with a low-barrier entry point or a challenge to the assumption that exercise has to be hard: "You don't need the gym. You need 10 minutes and this." / "The most underrated form of exercise for weight loss — and you're probably already doing it."
+- **Exercise & Movement** — visual: someone doing something low-effort and accessible — a walk, stretching at a desk. Spoken: the low-barrier entry point or the challenge to the "exercise has to be hard" assumption. "You don't need the gym. You need 10 minutes and this." / "The most underrated form of exercise for weight loss — and you're probably already doing it."
 
-- **Promotion & Offers** — lead with urgency, value, or social proof. This is one of the few pillars where a direct product reference in the hook is appropriate: "Our biggest offer of the year is live — and it closes Sunday." / "Thousands of Australians started their health journey this month. Here's why."
+- **Promotion & Offers** — visual: the offer on screen, a countdown, or social proof (member testimonials). Spoken: urgency, value, or proof. "Our biggest offer of the year is live — and it closes Sunday." / "Thousands of Australians started their health journey this month. Here's why."
 
-- **People & Community** — lead with a human moment, a relatable POV, or something that makes people stop and think "that's literally me". Humour and self-awareness work better here than science: "POV: it's 6pm and you have no idea what's for dinner again." / "When you meal prep on Sunday and eat it all by Tuesday 😅" / "If you've ever said 'I'll start Monday'... this one's for you."
+- **People & Community** — visual: a relatable human moment with no staging — messy kitchen, sad desk lunch, Sunday meal prep chaos. Spoken: a POV, a self-aware observation, or something that makes people think "that's literally me". Humour and self-awareness work better here than science. "POV: it's 6pm and you have no idea what's for dinner again." / "When you meal prep on Sunday and eat it all by Tuesday 😅"
 
 For People & Community content especially, don't force a credibility angle where a human moment works better.
-
-No visual directions in this section — that's covered by Creative Direction.
 
 ## Script Outline
 Scene-by-scene breakdown with rough timing (e.g. 0:00–0:10). For each scene, write the spoken content only — what the talent actually says. Do not include visual directions or on-screen text notes inside this section; those belong in Creative Direction and Key On-Screen Text respectively.

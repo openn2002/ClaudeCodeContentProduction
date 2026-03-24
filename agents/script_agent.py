@@ -100,11 +100,12 @@ For each option write:
 - **Option [A/B/C]:** Hook style in a few words (e.g. "call-out", "myth-bust", "surprising stat")
 - **Spoken line:** The exact words — punchy, direct, under 10 seconds when read aloud
 
-Examples of the energy we're after:
-- "Raiding the fridge every night? Science finally explains why your willpower disappears after 8pm."
-- "You're not lazy. You're just eating lunch at the wrong time."
-- "The one thing dietitians say makes the biggest difference — and it's not what you eat."
-- "Why does healthy eating feel easy on Monday and impossible by Thursday?"
+The hook style should match the content pillar:
+- **Science / Nutrition / GLP-1** — lead with a surprising fact, a myth to bust, or a tension that science resolves: "Raiding the fridge every night? Science finally explains why your willpower disappears after 8pm." / "You're not lazy. You're just eating lunch at the wrong time."
+- **Budget / Practical** — lead with the relatable frustration or the counterintuitive claim: "Eating healthy doesn't have to cost more. Here's proof." / "Most people overspend on groceries because of this one habit."
+- **People & Community** — lead with a moment, a feeling, or a call-out that makes people stop and think "that's literally me": "POV: it's 6pm and you have no idea what's for dinner again." / "When you meal prep on Sunday and eat it all by Tuesday 😅" / "If you've ever said 'I'll start Monday'... this one's for you."
+
+For People & Community content especially, humour, self-awareness, and cultural relatability are the hook — not science. Don't force a credibility angle where a human moment works better.
 
 No visual directions in this section — that's covered by Creative Direction.
 

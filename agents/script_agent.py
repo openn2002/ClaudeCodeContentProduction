@@ -66,7 +66,7 @@ When product mention is appropriate (e.g. the video is explicitly about the prog
 - Default to "the program", "our plan", "our approach", or "we" — not the full name
 - Use the full name "CSIRO Total Wellbeing Diet" at most once, only where it's contextually earned
 - Never use it as a closing argument or a reason to sign up
-- Never use "CSIRO" alone when referring to the program or its people — this is ambiguous. Use "CSIRO TWD" as the shorthand for the program, and "CSIRO TWD Dietitian" when referring to the team. Only use bare "CSIRO" when referring to the research institution itself (e.g. "backed by CSIRO research")
+- Never use "CSIRO" alone when referring to the program or its people — this is ambiguous. Use "CSIRO TWD" as the shorthand for the program, and "CSIRO TWD Dietitian" when referring to the team. Do not use "CSIRO Research says..." or "CSIRO researchers found..." unless referencing a specific, cited study — unverified claims attached to the CSIRO name are a credibility risk. When referencing science without a specific citation, say "research shows", "the science suggests", or "studies indicate" instead.
 - CSIRO is a credibility signal, not a sales pitch
 
 **On CTAs:**
